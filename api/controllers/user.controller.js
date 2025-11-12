@@ -1,5 +1,5 @@
-import User from "../models/user.model";
-import { errorHandler } from "../utils/error";
+import User from "../models/user.model.js";
+import { errorHandler } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 
 
@@ -10,27 +10,40 @@ export const test = (req , res) => {
 };
 
 
-export const updateUser = async (req , res , next) => {
-  if(req.user.id !== req.params.id) return next(errorHandler(401 , "You can only update your own  account!"))
+export const updateUser = async (req, res, next) => {
+  console.log("🔹 Update user triggered");
+  console.log("req.user:", req.user);
+  console.log("req.params.id:", req.params.id);
+  console.log("req.body:", req.body);
 
-    try {
-      if(req.body.password){
-        req.body.password = bcryptjs.hashSync(req.body.password, 10)
-      }
+  if (!req.user || req.user.id !== req.params.id) {
+    return next(errorHandler(401, "You can only update your own account!"));
+  }
 
-      const updateUser = await User.findByIdAndUpdate(req.params.id , {
-        $set:{
-          username:req.body.username,
-          email:req.body.email,
-          password:req.body.password,
-          avatar:req.body.avatar,
-        }
-      },{new:true})
-
-      const {password , ...rest} = updateUser._doc;
-
-      res.status(200).json(rest);
-    } catch (error) {
-      next(error)
+  try {
+    if (req.body.password) {
+      req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
-}
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+          avatar: req.body.avatar,
+        },
+      },
+      { new: true }
+    );
+
+    console.log("🔹 Updated user:", updatedUser);
+
+    const { password, ...rest } = updatedUser._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    console.error("❌ Update error:", error);
+    next(error);
+  }
+};
