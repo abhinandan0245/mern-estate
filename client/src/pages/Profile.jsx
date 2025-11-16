@@ -7,7 +7,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { deleteUserFailure, deleteUserStart, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice";
+import { deleteUserFailure, deleteUserStart, deleteUserSuccess, signoutUserFailure, signoutUserStart, signoutUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice";
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -101,6 +101,21 @@ export default function Profile() {
  };
 
 
+ const handleSignoutUser = async() => {
+  try {
+    dispatch(signoutUserStart());
+    const res = await fetch('/api/auth/signout');
+    const data = await res.json();
+    if(data.success === false){
+      dispatch(signoutUserFailure(data.message));
+      return;
+    }
+    dispatch(signoutUserSuccess(data));
+  } catch (error) {
+    dispatch(signoutUserFailure(data.message));
+  }
+ }
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7 ">Profile</h1>
@@ -157,15 +172,27 @@ export default function Profile() {
           disabled={loading}
           className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80"
         >
-          {loading ? "Loading...":"update"}
+          {loading ? "Loading..." : "update"}
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span onClick={handleDeleteUser} className="text-red-700 cursor-pointer">delete account</span>
-        <span className="text-red-700 cursor-pointer">sign out</span>
+        <span
+          onClick={handleDeleteUser}
+          className="text-red-700 cursor-pointer"
+        >
+          delete account
+        </span>
+        <span
+          onClick={handleSignoutUser}
+          className="text-red-700 cursor-pointer"
+        >
+          sign out
+        </span>
       </div>
-      <p className="text-red-500 mt-5">{error ? error: ""}</p>
-      <p className="text-green-500 mt-5">{updateSuccess ? "user is updated successfully!": ""}</p>
+      <p className="text-red-500 mt-5">{error ? error : ""}</p>
+      <p className="text-green-500 mt-5">
+        {updateSuccess ? "user is updated successfully!" : ""}
+      </p>
     </div>
   );
 }
