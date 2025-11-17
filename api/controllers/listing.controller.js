@@ -1,14 +1,26 @@
-import Listing from "../models/listing.model"
+import Listing from "../models/listing.model.js";
 
+export const createListing = async (req, res, next) => {
+  try {
+    console.log("Request body:", req.body);
+    console.log("Files processed:", req.body.images);
 
-export const createListing = async(req , res , next)=> {
-    try {
-        const listing = await Listing.create(req.body);
+    // Multiple images → stored in req.body.images
+    const imageUrls = req.body.images || [];
 
-       return res.status(201).json(listing);
+    const listing = await Listing.create({
+      ...req.body,
+      imageUrls,
+      userRef: req.user.id, // Always trust token, not client body
+    });
 
-
-    } catch (error) {
-        next(error);
-    }
-}
+    return res.status(201).json({
+      success: true,
+      data: listing,
+      message: "Listing created successfully",
+    });
+  } catch (error) {
+    console.error("Create listing error:", error);
+    next(error);
+  }
+};
