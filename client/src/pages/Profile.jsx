@@ -268,14 +268,22 @@ export default function Profile() {
                 <Link
                   className="font-semibold flex-1 hover:underline truncate"
                   to={`/listings/${listing._id}`}
-                  
                 >
                   <span>{listing.name}</span>
                 </Link>
-                 <div className="flex flex-col gap-3">
-                  <button onClick={() => handleListingDelete(listing._id)} className="text-red-700  border border-red-500 p-2 bg-red-500/10  rounded-sm font-semibold capitalize">delete</button>
-                  <button className="text-green-700 border border-green-700 p-2 rounded-sm bg-green-500/10  font-semibold capitalize">edit</button>
-                 </div>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => handleListingDelete(listing._id)}
+                    className="text-red-700  border border-red-500 p-2 bg-red-500/10  rounded-sm font-semibold capitalize"
+                  >
+                    delete
+                  </button>
+                  <Link to={`/update-listing/${listing._id}`}>
+                    <button className="text-green-700 border border-green-700 p-2 rounded-sm bg-green-500/10  font-semibold capitalize">
+                      edit
+                    </button>
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

@@ -44,47 +44,62 @@ export const deleteListing = async (req, res, next) => {
 };
 
 
-
-
 export const updateListing = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
+
     if (!listing) return next(errorHandler(404, "Listing not found!"));
 
+    // Authorization — only owner can update
     if (listing.userRef.toString() !== req.user.id) {
-      return next(errorHandler(401, "Only the owner can update this listing."));
+      return next(errorHandler(401, "Not allowed to update this listing."));
     }
 
-    let updatedImages = [...listing.imageUrls];
+    // -----------------------------
+    // 1️⃣ START WITH EXISTING IMAGES
+    // -----------------------------
+    let finalImages = [...listing.imageUrls];
 
-    //  DELETE SELECTED IMAGES
-    if (req.body.deleteImages && Array.isArray(req.body.deleteImages)) {
-      req.body.deleteImages.forEach((img) => {
-        updatedImages = updatedImages.filter((i) => i !== img);
-        deleteFile(img); // remove from disk
-      });
+    // -----------------------------
+    // 2️⃣ HANDLE DELETE IMAGES
+    // -----------------------------
+    let deleteImages = [];
+
+    if (req.body.deleteImages) {
+      if (typeof req.body.deleteImages === "string") {
+        deleteImages = [req.body.deleteImages];
+      } else if (Array.isArray(req.body.deleteImages)) {
+        deleteImages = req.body.deleteImages;
+      }
     }
 
-    //  ADD NEW IMAGES (from multer/sharp)
+    // Remove from array + delete from disk
+    deleteImages.forEach((img) => {
+      finalImages = finalImages.filter((i) => i !== img);
+      deleteFile(img);
+    });
+
+    // -----------------------------
+    // 3️⃣ HANDLE NEW UPLOADED IMAGES
+    // -----------------------------
+    // Your compress middleware puts final compressed image URLs in req.body.images
     if (req.body.images) {
-      updatedImages = [...updatedImages, ...req.body.images];
+      const newImages = Array.isArray(req.body.images)
+        ? req.body.images
+        : [req.body.images];
+
+      finalImages.push(...newImages);
     }
 
-    //  FULL REPLACE MODE (overwrite all images)
-    if (req.body.replaceImages === "true" || req.body.replaceImages === true) {
-      // delete old files
-      listing.imageUrls.forEach((old) => deleteFile(old));
-
-      // replace with new
-      updatedImages = req.body.images || [];
-    }
-
+    // -----------------------------
+    // 4️⃣ UPDATE THE LISTING
+    // -----------------------------
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
           ...req.body,
-          imageUrls: updatedImages,
+          imageUrls: finalImages,
         },
       },
       { new: true }
@@ -93,9 +108,26 @@ export const updateListing = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: updatedListing,
-      message: "Listing updated successfully!",
+      message: "Listing updated successfully",
     });
   } catch (error) {
+    console.error("❌ Update listing error:", error);
     next(error);
   }
 };
+
+
+
+
+
+export const getListing = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+    if (!listing) return next(errorHandler(404, "Listing not found!"));
+    res.status(200).json(listing);
+  }
+    catch (error) {
+    next(error);
+    }
+};
+
