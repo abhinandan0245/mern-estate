@@ -267,7 +267,7 @@ export default function Profile() {
                 </Link>
                 <Link
                   className="font-semibold flex-1 hover:underline truncate"
-                  to={`/listings/${listing._id}`}
+                  to={`/listing/${listing._id}`}
                 >
                   <span>{listing.name}</span>
                 </Link>
