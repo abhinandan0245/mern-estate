@@ -218,6 +218,7 @@ export default function ListingCard({ listing }) {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              
             >
               <path
                 strokeLinecap="round"
