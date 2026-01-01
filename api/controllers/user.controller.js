@@ -4,12 +4,6 @@ import { errorHandler } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 
 
-export const test = (req , res) => {
-  res.json({
-    message: "hello world!",
-  });
-};
-
 
 export const updateUser = async (req, res, next) => {
   console.log("🔹 Update user triggered");
@@ -17,9 +11,10 @@ export const updateUser = async (req, res, next) => {
   console.log("req.params.id:", req.params.id);
   console.log("req.body:", req.body);
 
-  if (!req.user || req.user.id !== req.params.id) {
+  if (req.user.id !== req.params.id && req.user.role !== "admin") {
     return next(errorHandler(401, "You can only update your own account!"));
   }
+
 
   try {
     if (req.body.password) {
@@ -51,7 +46,12 @@ export const updateUser = async (req, res, next) => {
 
 
 export const deleteUser = async (req , res , next) => {
-  if(req.user.id !== req.params.id) return next(errorHandler(401 , 'You can only delete your own account!'));
+ if (req.user.id !== req.params.id && req.user.role !== "admin") {
+   return next(
+     errorHandler(401, "Only owner or admin can delete this account!")
+   );
+ }
+
   try {
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json('User has been deleted!');
@@ -61,19 +61,22 @@ export const deleteUser = async (req , res , next) => {
 };
 
 export const getUserListings = async (req, res, next) => {
-  if (req.user.id === req.params.id) {
-     try {
-       const listings = await Listing.find({ userRef: req.params.id });
-       res.status(200).json(listings);
-     } catch (error) {
-       next(error);
-     } 
-  } else{
-    
-    return next(errorHandler(401, "You can only access your own listings!"));
+  try {
+    console.log("User:", req.user); // Check incoming info
+
+    if (req.user.id !== req.params.id && req.user.role !== "admin") {
+      return next(errorHandler(401, "Not allowed to view these listings!"));
+    }
+
+    const listings = await Listing.find({ userRef: req.params.id });
+
+    return res.status(200).json(listings);
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
- 
 };
+
 
 export const getUser = async (req, res, next) => {
     try { 
@@ -87,5 +90,26 @@ export const getUser = async (req, res, next) => {
       next(error);
     }
   };
+
+
+  export const getUserStats = async (req, res, next) => {
+    try {
+      const userId = req.params.id;
+      if (req.user.id !== userId && req.user.role !== "admin")
+        return next(errorHandler(403, "Forbidden"));
+
+      const myListings = await Listing.countDocuments({ userRef: userId });
+      // favorites, messages — if you have collections for those, count them
+      // For now mock or return listing count + maybe approved count:
+      const approved = await Listing.countDocuments({
+        userRef: userId,
+        status: "approved",
+      });
+      res.status(200).json({ myListings, approved });
+    } catch (err) {
+      next(err);
+    }
+  };
+
 
 

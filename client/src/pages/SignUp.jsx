@@ -3,7 +3,7 @@ import {Link , useNavigate} from 'react-router-dom'
 import OAuth from '../components/OAuth';
 
 export default function SignUp() {
-  const [formData , setFormData] = useState({})
+  const [formData, setFormData] = useState({ role: "buyer" });
   const [error,  setError] = useState(null)
   const [loading , setLoading] = useState(false);
   const navigate = useNavigate();
@@ -74,6 +74,16 @@ export default function SignUp() {
           className="border p-3 rounded-lg "
           placeholder="password"
         />
+        {/* ROLE SELECT */}
+        <select
+          id="role"
+          onChange={handleChange}
+          value={formData.role}
+          className="border p-3 rounded-lg"
+        >
+          <option value="buyer">Buyer (Purchase Property)</option>
+          <option value="user">Seller (List Property)</option>
+        </select>
 
         <button
           disabled={loading}
@@ -82,7 +92,7 @@ export default function SignUp() {
         >
           {loading ? "Loading..." : "SignUp"}
         </button>
-        <OAuth/>
+        <OAuth />
       </form>
       <div className="flex gap-2 mt-5">
         <p>Have an Account?</p>
@@ -90,7 +100,7 @@ export default function SignUp() {
           <span className="text-blue-500">Sign In</span>
         </Link>
       </div>
-      {error && <p className='text-red-500 mt-5'>{error}</p>}
+      {error && <p className="text-red-500 mt-5">{error}</p>}
     </div>
   );
 }

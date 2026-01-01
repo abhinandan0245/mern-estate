@@ -19,7 +19,10 @@ export default function Home() {
   useEffect(() => {
     const fetchOfferedListings = async () => {
       try {
-        const res = await fetch('/api/listing/get?offer=true&sort=created_at&order=desc&limit=4');
+        const res = await fetch(
+          "/api/listing/get?offer=true&sort=createdAt&order=desc&limit=4"
+        );
+
         const data = await res.json();
         setOfferedListings(data);
       } catch (error) { 
@@ -31,7 +34,10 @@ export default function Home() {
     };
     const fetchRentListings = async () => {
       try {
-        const res = await fetch('/api/listing/get?type=rent&sort=created_at&order=desc&limit=4');
+        const res = await fetch(
+          "/api/listing/get?type=rent&sort=createdAt&order=desc&limit=4"
+        );
+
         const data = await res.json();
         setRentListings(data);
       }
@@ -42,7 +48,10 @@ export default function Home() {
 
     const fetchSaleListings = async () => {
       try {
-        const res = await fetch('/api/listing/get?type=sale&sort=created_at&order=desc&limit=4');
+        const res = await fetch(
+          "/api/listing/get?type=sale&sort=createdAt&order=desc&limit=4"
+        );
+
         const data = await res.json();
         setSaleListings(data);
       } catch (error) {
@@ -140,7 +149,7 @@ export default function Home() {
             </div>
           </>
         )}
-        
+
             
       </div>
     </div>

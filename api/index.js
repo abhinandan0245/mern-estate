@@ -4,7 +4,9 @@ import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import listingRouter from "./routes/listing.route.js";
+import adminRoutes from "./routes/admin.routes.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 // import cors from "cors"; // optional if you add it later
 
 dotenv.config();
@@ -14,12 +16,12 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ✅ Optional: CORS for React
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 // ✅ Connect MongoDB
 mongoose
@@ -31,6 +33,8 @@ mongoose
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
+app.use("/api/admin", adminRoutes);
+
 app.use("/uploads", express.static("uploads"));
 
 // ✅ Global error handler

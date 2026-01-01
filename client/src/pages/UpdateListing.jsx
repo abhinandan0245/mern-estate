@@ -93,7 +93,7 @@ export default function UpdateListing() {
 
     // File size check (5MB max)
     const oversizedFiles = selectedFiles.filter(
-      (file) => file.size > 5 * 1024 * 1024
+      (file) => file.size > 20 * 1024 * 1024
     );
 
     if (oversizedFiles.length > 0) {

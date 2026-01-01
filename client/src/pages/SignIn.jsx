@@ -24,19 +24,28 @@ export default function SignIn() {
        dispatch(signInStart());
     const res = await fetch("/api/auth/signin", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // <--- important
       body: JSON.stringify(formData),
     });
+
     const data = await res.json();
-    console.log(data);
-    if(data.success === false){
-      dispatch(signInFailure(data.message))
+
+    if (!res.ok) {
+      dispatch(signInFailure(data.message || "Signin failed"));
       return;
     }
-    dispatch(signInSuccess(data))
-    navigate('/')
+
+    // `data` should be user object with `role`
+    dispatch(signInSuccess(data));
+
+    // Redirect based on role
+    if (data.role === "admin") {
+      navigate("/dashboard/admin");
+    } else {
+      navigate("/dashboard/user");
+    }
+
     } catch (error) {
       dispatch(signInFailure(error.message))
     }
